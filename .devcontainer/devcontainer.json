@@ -1,0 +1,25 @@
+{
+    "name": "${localWorkspaceFolderBasename}",
+    "remoteUser": "${localEnv:USER}",
+    "dockerComposeFile": "./docker-compose.yaml",
+    "service": "devcontainer_service",
+    "workspaceFolder": "${localWorkspaceFolder}",
+    "initializeCommand": "bash .devcontainer/initialize.sh",
+    "containerEnv": {
+        "IGN_PARTITION": "gazebo-marc"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-azuretools.vscode-docker",
+                "DavidAnson.vscode-markdownlint",
+                "ms-python.python",
+                "ms-vscode.cpptools",
+                "ms-python.vscode-pylance",
+                "charliermarsh.ruff",
+                "mhutchie.git-graph"
+            ]
+        }
+    },
+    "postCreateCommand": "bash .devcontainer/post_create.sh"
+}

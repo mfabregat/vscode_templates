@@ -1,0 +1,20 @@
+# Shared Ruff configuration.
+#
+# Read by BOTH the VS Code Ruff extension and the pre-commit hook, so the editor
+# and the commit-time formatter cannot drift apart.
+#
+# Line length matches the CI check (ament_flake8.ini: max-line-length = 99).
+line-length = 99
+
+[lint]
+# Exactly the rules CI enforces, nothing more.
+#
+# CI runs ament_flake8, whose ini declares a broad extend-ignore (B902, C816,
+# D1xx, D203, D212, D404, I202) -- but those plugins are NOT installed in the
+# image, so flake8 only ever emits pycodestyle (E, W) and pyflakes (F) codes.
+# Verified directly:
+#   python3 -m flake8 --config .../ament_flake8/configuration/ament_flake8.ini <file>
+#   -> a file with malformed docstrings reports "No problems found".
+#
+# Selecting D/I/A/ERA/RET/PLR here would block commits on things CI ignores.
+select = ["E", "W", "F"]

@@ -1,0 +1,62 @@
+services:
+  devcontainer_service:
+    image: ${WORKSPACE_NAME:-devcontainer}
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+      args:
+        - USER=${USER}
+        - USER_UID=${USER_UID}
+        - USER_GID=${USER_GID}
+        - HOME=${HOME}
+        - WORKSPACE_PATH=${WORKSPACE_PATH}
+    container_name: ${WORKSPACE_NAME:-devcontainer}
+
+    # --- ENVIRONMENT ---
+    environment:
+      - DISPLAY=${DISPLAY}
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - ROS_DOMAIN_ID=47
+      - ROS_LOCALHOST_ONLY=1
+      # PRIME laptop (NVIDIA dGPU + Intel iGPU): do NOT force NVIDIA GL/EGL here.
+      # gazebo.launch.py sets __NV_PRIME_RENDER_OFFLOAD/__GLX_VENDOR_LIBRARY_NAME/
+      # __EGL_VENDOR_LIBRARY_FILENAMES itself, but only when `nvidia-smi` proves the
+      # driver can actually serve a context. Hard-coding them here would defeat that
+      # health gate: when the dGPU is wedged (nvidia-smi "Unknown Error"), Gazebo and
+      # RViz would hard-abort instead of falling back to Mesa.
+
+      # --- VOLUMES & DEVICES ---
+    volumes:
+      - ${WORKSPACE_PATH}:${WORKSPACE_PATH}
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XDG_RUNTIME_DIR:-/run/user/${USER_UID}}:${XDG_RUNTIME_DIR:-/run/user/${USER_UID}}
+
+    # --- NETWORKING & IPC ---
+    network_mode: host
+    ipc: host
+    stdin_open: true
+    tty: true
+
+    # --- SECURITY / PRIVILEGES ---
+    privileged: true
+    # Access to all DRI nodes (Intel iGPU nodes are root:video/root:render;
+    # without this Mesa/EGL enumeration hits "Permission denied" and Gazebo
+    # falls back to software rendering).
+    group_add:
+      - video
+      - "992" # render (has no name in the Jammy container)
+    security_opt:
+      - seccomp=unconfined
+    cap_add:
+      - SYS_PTRACE
+
+    # --- HARDWARE & RESOURCE LIMITS ---
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu, utility, compute ]

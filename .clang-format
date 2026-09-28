@@ -1,0 +1,20 @@
+---
+# Matches the CI C++ style check: ament_cpplint uses --linelength=100.
+# Used by both the pre-commit clang-format hook and the VS Code C++ formatter.
+#
+# Like .clang-format files generally, clang-format discovers this by walking up
+# from each source file, so it also applies to the nested repos under src/.
+Language: Cpp
+BasedOnStyle: Google
+ColumnLimit: 100
+IndentWidth: 2
+TabWidth: 8
+UseTab: Never
+AccessModifierOffset: -1
+DerivePointerAlignment: false
+PointerAlignment: Left
+# cpplint's build/include_order is explicitly filtered out in this workspace's
+# CMakeLists (`ament_cpplint(FILTERS -build/include_order)`), and re-sorting
+# includes can change behaviour, so leave include order alone.
+SortIncludes: false
+...

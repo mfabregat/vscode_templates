@@ -1,0 +1,54 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    // Build tasks
+    {
+      "label": "colcon build",
+      "detail": "Build workspace (default)",
+      "type": "shell",
+      "command": "colcon build --symlink-install --cmake-args '-DCMAKE_BUILD_TYPE=RelWithDebInfo' '-DCMAKE_EXPORT_COMPILE_COMMANDS=On' -Wall -Wextra -Wpedantic",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "clean colcon build",
+      "detail": "Run the clean target",
+      "type": "shell",
+      "command": "sudo rm -fr build install log; sudo py3clean .; colcon build --symlink-install --cmake-args '-DCMAKE_BUILD_TYPE=RelWithDebInfo' '-DCMAKE_EXPORT_COMPILE_COMMANDS=On' -Wall -Wextra -Wpedantic",
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "import ros2.repos",
+      "detail": "Use vcs to import modules specified by a workspace/rosinstall file.",
+      "type": "shell",
+      "command": "envsubst < src/ros2.repos | vcs import src",
+      "problemMatcher": []
+    },
+    {
+      "label": "export ros2.repos",
+      "detail": "Use vcs to update repositories in src to workspace file.",
+      "type": "shell",
+      "command": "vcs export src > src/ros2.repos",
+      "problemMatcher": []
+    },
+    {
+      "label": "rosdep install",
+      "detail": "Install all dependencies specified in the workspaces package.xml files.",
+      "type": "shell",
+      "command": "sudo apt-get update && rosdep update && rosdep install --from-paths src --ignore-src -y",
+      "problemMatcher": []
+    },
+    {
+      "label": "stop ros2",
+      "detail": "Stop all running ROS 2 processes.",
+      "type": "shell",
+      "command": "pkill -f -9 ros; pkill -f -9 gz; pkill -f -9 gazebo; pkill -f -9 ign; ros2 daemon stop",
+      "problemMatcher": []
+    },
+  ]
+}

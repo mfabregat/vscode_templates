@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Global pre-commit hook for the humanoids_ws superproject.
+#
+# Wired up with:
+#   git config --global core.hooksPath "<workspace>/.githooks"
+# so it fires for the root repo and every nested repo under src/.
+#
+# Git runs hooks with the repo root as the working directory and no arguments;
+# pre-commit then determines the staged files itself.
+set -euo pipefail
+
+# `pip install --user` installs the console script here, and git hooks do not
+# source ~/.bashrc, so make sure it is on PATH.
+export PATH="${HOME}/.local/bin:${PATH}"
+
+hooks_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+config="$(dirname "${hooks_dir}")/.pre-commit-config.yaml"
+
+if ! command -v pre-commit >/dev/null 2>&1; then
+    echo "pre-commit not installed; skipping hooks. Run: pip install --user pre-commit" >&2
+    exit 0
+fi
+
+if [[ ! -f "${config}" ]]; then
+    echo "shared pre-commit config not found at ${config}; skipping hooks." >&2
+    exit 0
+fi
+
+exec pre-commit run --config "${config}" --hook-stage pre-commit "$@"
